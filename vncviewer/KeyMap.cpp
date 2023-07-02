@@ -560,8 +560,8 @@ void KeyMap::PCtoX(BYTE virtKey, DWORD keyData, ClientConnection* clientCon)
     bool repeated = ((keyData & 0xc0000000) == 0x40000000);
     UINT extVkey = virtKey + (extended ? 256 : 0);
 
-	// exclude winkey when not scroll-lock
-	if (virtKey==91 || virtKey==92) return;
+    // exclude winkey when not scroll-lock
+    if (virtKey==91 || virtKey==92) return;
 
    vnclog.Print(8, _T("\nPCtoX: %svirtKey 0x%02x%s%s, keyData 0x%08x\n"),
               (extended ? _T("extended ") : _T("")), virtKey,
@@ -576,21 +576,22 @@ void KeyMap::PCtoX(BYTE virtKey, DWORD keyData, ClientConnection* clientCon)
       if (downUnicode[extVkey]) {
          vnclog.Print(8, _T("  0x%04x (%c): "), downUnicode[extVkey], downUnicode[extVkey]);
           downUnicode[extVkey] = NULL;
-      } else {
+      }
+      else {
          vnclog.Print(8, _T("  Control character: "));
       }
 
       releaseKey(clientCon, extVkey);
      vnclog.Print(8, _T("\n"));
-	 GetKeyboardState(KBKeysState);
+     GetKeyboardState(KBKeysState);
     if (!((KBKeysState[VK_MENU] & 0x80) && (KBKeysState[VK_CONTROL] & 0x80)))
-	{
-	 if (storedDeadChar && reset) {
- 	 reset=false;
-	 keybd_event(VK_SPACE, 0, 0, 0);
-	 keybd_event(VK_SPACE, 0, KEYEVENTF_KEYUP, 0);
-	 }
-	}
+    {
+     if (storedDeadChar && reset) {
+       reset = false;
+       keybd_event(VK_SPACE, 0, 0, 0);
+       keybd_event(VK_SPACE, 0, KEYEVENTF_KEYUP, 0);
+     }
+    }
       return;
     }
 
@@ -618,7 +619,8 @@ void KeyMap::PCtoX(BYTE virtKey, DWORD keyData, ClientConnection* clientCon)
         pressKey(clientCon, extVkey, foundXCode);
        vnclog.Print(8, _T("\n"));
         return;
-    } else {
+    }
+    else {
        vnclog.Print(8, _T("-> not in special keyMap\n"));
     }
 
@@ -627,7 +629,7 @@ void KeyMap::PCtoX(BYTE virtKey, DWORD keyData, ClientConnection* clientCon)
 
     ModifierKeyReleaser lctrl(clientCon, VK_CONTROL, 0);
     ModifierKeyReleaser lalt(clientCon, VK_MENU, 0);
-    ModifierKeyReleaser ralt(clientCon, VK_MENU, 1);
+    //ModifierKeyReleaser ralt(clientCon, VK_MENU, 1);
 
     if ((KBKeysState[VK_MENU] & 0x80) && (KBKeysState[VK_CONTROL] & 0x80)) {
         // This is a Ctrl-Alt (AltGr) key on international keyboards (= LCtrl-RAlt)
@@ -640,8 +642,9 @@ void KeyMap::PCtoX(BYTE virtKey, DWORD keyData, ClientConnection* clientCon)
         //   to use it for doing Ctrl-AltGr-x, e.g. Ctl-@, etc
         lctrl.release(downKeysym);
         lalt.release(downKeysym);
-        ralt.release(downKeysym);
-    } else {
+        //ralt.release(downKeysym);
+    }
+    else {
         // This is not a Ctrl-Alt (AltGr) key
        vnclog.Print(8, _T("Ctrl-Alt not pressed, fake release any Ctrl key\n"));
 
@@ -651,7 +654,7 @@ void KeyMap::PCtoX(BYTE virtKey, DWORD keyData, ClientConnection* clientCon)
         KBKeysState[VK_CONTROL] = KBKeysState[VK_LCONTROL] = KBKeysState[VK_RCONTROL] = 0;
     }
 
-	int ret;
+    int ret;
     if (storedDeadChar) {
         SHORT virtDeadKey;
         BYTE prevModifierState = 0;
@@ -672,15 +675,17 @@ void KeyMap::PCtoX(BYTE virtKey, DWORD keyData, ClientConnection* clientCon)
        vnclog.Print(8, _T("\n"));
 
         storedDeadChar = 0;
-		ret = ToUnicode(virtKey, 0, KBKeysState, ucsChar, (sizeof(ucsChar) / sizeof(WCHAR)), 0);
+        ret = ToUnicode(virtKey, 0, KBKeysState, ucsChar, (sizeof(ucsChar) / sizeof(WCHAR)), 0);
     }
 
     else ret = ToUnicode(virtKey, 0, KBKeysState, ucsChar, (sizeof(ucsChar) / sizeof(WCHAR)), 0);
-	if (ucsChar[0]==8364)
-	{
-		//euro
-//		return;
-	}
+
+    if (ucsChar[0]==8364)
+    {
+        //euro
+//      return;
+    }
+
     if (ret < 0 || ret==2) {
         //  It is a dead key
        vnclog.Print(8, _T("ToUnicode returns dead key: 0x%02x (%c) "), *ucsChar, *ucsChar);
@@ -701,17 +706,20 @@ void KeyMap::PCtoX(BYTE virtKey, DWORD keyData, ClientConnection* clientCon)
                vnclog.Print(8, _T("-> deadKeyMap gives KeySym %u (0x%08x)\n"),
                           foundXCode, foundXCode);
                 pressKey(clientCon, extVkey, foundXCode);
-            } else {
+            }
+            else {
                vnclog.Print(8, _T("-> not in deadKeyMap\n"));
             }
-        } else {
-            storedDeadChar = *ucsChar;
-			reset=true;
+        }
+        else {
+           storedDeadChar = *ucsChar;
+           reset = true;
            vnclog.Print(8, _T("-> Store the dead key state, wait for next key-stroke\n"));
         }
 
         FlushDeadKey(KBKeysState);
-    } else if (ret > 0) {
+    }
+    else if (ret > 0) {
        vnclog.Print(8, _T("ToUnicode returns %d character(s):\n"), ret);
 
         for (int i = 0; i < ret; i++) {
@@ -719,10 +727,10 @@ void KeyMap::PCtoX(BYTE virtKey, DWORD keyData, ClientConnection* clientCon)
             if (xChar != XK_VoidSymbol) {
                 downUnicode[extVkey] = *(ucsChar+i);
                 pressKey(clientCon, extVkey, xChar);
-
             }
         }
-    } else {
+    }
+    else {
        vnclog.Print(8, _T("No character is generated by this key event\n"));
     }
 
