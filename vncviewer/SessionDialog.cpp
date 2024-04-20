@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-//  Copyright (C) 2002-2013 UltraVNC Team Members. All Rights Reserved.
+//  Copyright (C) 2002-2024 UltraVNC Team Members. All Rights Reserved.
 //
 //  This program is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -16,11 +16,12 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 //  USA.
 //
-// If the source code for the program is not available from the place from
-// which you received this file, check
-// http://www.uvnc.com/
+//  If the source code for the program is not available from the place from
+//  which you received this file, check
+//  https://uvnc.com/
 //
 ////////////////////////////////////////////////////////////////////////////
+
 
 // SessionDialog.cpp: implementation of the SessionDialog class.
 
@@ -36,6 +37,8 @@
 #ifdef _CLOUD
 #include "../UdtCloudlib/proxy/Cloudthread.h"
 #endif
+#include "AboutBox.h"
+#include "UltraVNCHelperFunctions.h"
 
 #define SESSION_MRU_KEY_NAME _T("Software\\ORL\\VNCviewer\\MRU")
 #define NUM_MRU_ENTRIES 8
@@ -199,6 +202,11 @@ BOOL CALLBACK SessDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	if (uMsg == WM_INITDIALOG) {
 		_this = (SessionDialog*)lParam;
 		helper::SafeSetWindowUserData(hwnd, lParam);
+		char version[50]{};
+		char title[256]{};
+		strcpy_s(title, "UltraVNC Viewer - ");
+		strcat_s(title, GetVersionFromResource(version));
+		SetWindowText(hwnd, title);
 	}
 	else
 		_this = (SessionDialog*)helper::SafeGetWindowUserData<SessionDialog>(hwnd);
@@ -227,6 +235,9 @@ BOOL CALLBACK SessDlgProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
+		case IDC_ABOUT:
+			ShowAboutBox();
+			break;
 		case IDC_RADIOREPEATER:
 		case IDC_RADIODIRECT:
 			_this->ModeSwitch(hwnd, wParam);
@@ -417,6 +428,7 @@ void SessionDialog::DpiChange(HWND hDlg)
 		wndDefaultBox = GetDlgItem(hDlg, IDC_DEFAULTBOX);
 		if (wndDefaultBox == NULL) return;
 		GetWindowRect(wndDefaultBox, &rcDefaultBox);
+		rcDefaultBox.left += 2;
 		cx = rcDefaultBox.right - rcWnd.left; // OK
 		// cy = rcWnd.bottom - rcWnd.top;  // not OK, toDo  size wrong after dpichange
 	}
@@ -438,12 +450,11 @@ void SessionDialog::ExpandBox(HWND hDlg, BOOL fExpand)
 
 	wndDefaultBox = GetDlgItem(hDlg, IDC_DEFAULTBOX);
 	if (wndDefaultBox == NULL) return;
-
 	if (!fExpand) SendMessage(GetDlgItem(hDlg, IDC_BUTTON_EXPAND), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hBmpExpand);
 	else SendMessage(GetDlgItem(hDlg, IDC_BUTTON_EXPAND), BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hBmpCollaps);
 	// retrieve coordinates for the default child window
 	GetWindowRect(wndDefaultBox, &rcDefaultBox);
-
+	rcDefaultBox.left += 2;
 	// enable/disable all of the child window outside of the default box.
 	wndChild = GetTopWindow(hDlg);
 
@@ -464,7 +475,7 @@ void SessionDialog::ExpandBox(HWND hDlg, BOOL fExpand)
 		GetWindowRect(hDlg, &rcWnd);
 
 		// this is the first time we are being called to shrink the dialog
-		// box.  The dialog box is currently in its expanded size and we must
+		// box. The dialog box is currently in its expanded size and we must
 		// save the expanded width and height so that it can be restored
 		// later when the dialog box is expanded.
 
@@ -575,7 +586,7 @@ void SessionDialog::InitDlgProc(bool loadhost, bool initMruNeeded)
 		0,                         // nEscapement
 		0,                         // nOrientation
 		FW_BOLD,                 // nWeight
-		TRUE,                     // bItalic
+		false,                     // bItalic
 		FALSE,                     // bUnderline
 		0,                         // cStrikeOut
 		ANSI_CHARSET,              // nCharSet
@@ -697,13 +708,13 @@ bool SessionDialog::connect(HWND hwnd)
 				}
 				else {
 					m_pDSMPlugin->SetEnabled(false);
-					MessageBox(hwnd, sz_F7, sz_F6, MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
+					yesUVNCMessageBox(hwnd, sz_F7, sz_F6,MB_ICONEXCLAMATION);
 					return TRUE;
 				}
 			}
 			else {
 				m_pDSMPlugin->SetEnabled(false);
-				MessageBox(hwnd, sz_F5, sz_F6, MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
+				yesUVNCMessageBox(hwnd, sz_F5, sz_F6, MB_ICONEXCLAMATION);
 				return TRUE;
 			}
 		}
@@ -730,13 +741,13 @@ bool SessionDialog::connect(HWND hwnd)
 				}
 				else {
 					m_pDSMPlugin->SetEnabled(false);
-					MessageBox(hwnd, sz_F7, sz_F6, MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
+					yesUVNCMessageBox(hwnd, sz_F7, sz_F6, MB_ICONEXCLAMATION);
 					return TRUE;
 				}
 			}
 			else {
 				m_pDSMPlugin->SetEnabled(false);
-				MessageBox(hwnd, sz_F5, sz_F6, MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
+				yesUVNCMessageBox(hwnd, sz_F5, sz_F6,MB_ICONEXCLAMATION);
 				return TRUE;
 			}
 		}

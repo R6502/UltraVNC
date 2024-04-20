@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-//  Copyright (C) 2002-2013 UltraVNC Team Members. All Rights Reserved.
+//  Copyright (C) 2002-2024 UltraVNC Team Members. All Rights Reserved.
 //
 //  This program is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 //  USA.
 //
-// If the source code for the program is not available from the place from
-// which you received this file, check 
-// http://www.uvnc.com/
+//  If the source code for the program is not available from the place from
+//  which you received this file, check
+//  https://uvnc.com/
 //
 ////////////////////////////////////////////////////////////////////////////
 
@@ -42,8 +42,14 @@
 #include <rdr/MemInStream.h>
 #include <rdr/ZlibOutStream.h>
 #include <rdr/ZlibInStream.h>
+#ifdef _VCPKG
+#include  <zlib.h>
+#include  <zstd.h>
+#else
 #include "../zlib/zlib.h"
 #include "../zstd/lib/zstd.h"
+#endif
+
 
 
 

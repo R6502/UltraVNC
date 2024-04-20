@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-//  Copyright (C) 2002-2013 UltraVNC Team Members. All Rights Reserved.
+//  Copyright (C) 2002-2024 UltraVNC Team Members. All Rights Reserved.
 //
 //  This program is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 //  USA.
 //
-// If the source code for the program is not available from the place from
-// which you received this file, check 
-// http://www.uvnc.com/
+//  If the source code for the program is not available from the place from
+//  which you received this file, check
+//  https://uvnc.com/
 //
 ////////////////////////////////////////////////////////////////////////////
 #include "stdhdrs.h"
@@ -27,6 +27,7 @@
 #include <shlobj.h>
 #include <direct.h>
 #include <fstream>
+#include "UltraVNCHelperFunctions.h"
 extern char sz_K1[64];
 extern char sz_K2[64];
 extern bool g_disable_sponsor;
@@ -67,7 +68,7 @@ void SessionDialog::SaveConnection(HWND hwnd, bool saveAs)
 				break;
 			case FNERR_INVALIDFILENAME:
 				strcpy_s(msg, sz_K1);
-				MessageBox(hwnd, msg, sz_K2, MB_ICONERROR | MB_OK | MB_SETFOREGROUND | MB_TOPMOST);
+				yesUVNCMessageBox(hwnd, msg, sz_K2, MB_ICONERROR);
 				break;
 			default:
 				vnclog.Print(0, "Error %d from GetSaveFileName\n", err);
@@ -390,7 +391,7 @@ void SessionDialog::SetDefaults()
 	useAllMonitors =0;
 	requestedWidth = 0;
 	requestedHeight = 0;
-	_tcscpy_s(prefix, "vnc_");
+	_tcscpy_s(prefix, "ultravnc_");
 	_tcscpy_s(imageFormat, ".jpeg");
 	fAutoAcceptIncoming = false;
 	fAutoAcceptNoDSM = false;

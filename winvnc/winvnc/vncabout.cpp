@@ -1,9 +1,9 @@
+/////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) 2002-2024 UltraVNC Team Members. All Rights Reserved.
 //  Copyright (C) 2002 RealVNC Ltd. All Rights Reserved.
 //  Copyright (C) 1999 AT&T Laboratories Cambridge. All Rights Reserved.
 //
-//  This file is part of the VNC system.
-//
-//  The VNC system is free software; you can redistribute it and/or modify
+//  This program is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation; either version 2 of the License, or
 //  (at your option) any later version.
@@ -18,9 +18,11 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 //  USA.
 //
-// If the source code for the VNC system is not available from the place 
-// whence you received this file, check http://www.uk.research.att.com/vnc or contact
-// the authors on vnc@uk.research.att.com for information on obtaining it.
+//  If the source code for the program is not available from the place from
+//  which you received this file, check
+//  https://uvnc.com/
+//
+////////////////////////////////////////////////////////////////////////////
 
 
 // vncAbout.cpp
@@ -34,6 +36,57 @@
 
 //	[v1.0.2-jp1 fix] Load resouce from dll
 extern HINSTANCE	hInstResDLL;
+
+char* GetVersionFromResource(char* version)
+{
+    HRSRC hResInfo;
+    DWORD dwSize;
+    HGLOBAL hResData;
+    LPVOID pRes, pResCopy;
+    UINT uLen = 0;
+    VS_FIXEDFILEINFO* lpFfi = NULL;
+    HINSTANCE hInst = ::GetModuleHandle(NULL);
+
+    hResInfo = FindResource(hInst, MAKEINTRESOURCE(1), RT_VERSION);
+    if (hResInfo)
+    {
+        dwSize = SizeofResource(hInst, hResInfo);
+        hResData = LoadResource(hInst, hResInfo);
+        if (hResData)
+        {
+            pRes = LockResource(hResData);
+            if (pRes)
+            {
+                pResCopy = LocalAlloc(LMEM_FIXED, dwSize);
+                if (pResCopy)
+                {
+                    CopyMemory(pResCopy, pRes, dwSize);
+
+                    if (VerQueryValue(pResCopy, ("\\"), (LPVOID*)&lpFfi, &uLen))
+                    {
+                        if (lpFfi != NULL)
+                        {
+                            DWORD dwFileVersionMS = lpFfi->dwFileVersionMS;
+                            DWORD dwFileVersionLS = lpFfi->dwFileVersionLS;
+
+                            DWORD dwLeftMost = HIWORD(dwFileVersionMS);
+                            DWORD dwSecondLeft = LOWORD(dwFileVersionMS);
+                            DWORD dwSecondRight = HIWORD(dwFileVersionLS);
+                            DWORD dwRightMost = LOWORD(dwFileVersionLS);
+
+                            sprintf(version, " %d.%d.%d.%d", dwLeftMost, dwSecondLeft, dwSecondRight, dwRightMost);
+                        }
+                    }
+
+                    LocalFree(pResCopy);
+                }
+            }
+        }
+    }
+    strcat(version, (char*)"-dev");
+    return version;
+}
+
 
 HBITMAP
     DoGetBkGndBitmap(IN CONST UINT uBmpResId )
@@ -178,7 +231,11 @@ vncAbout::DialogProc(HWND hwnd,
 			SetForegroundWindow(hwnd);
 
 			_this->m_dlgvisible = TRUE;
-
+            char version[50]{};
+			char title[256]{};
+			strcpy_s(title, "UltraVNC Server - ");
+			strcat_s(title, GetVersionFromResource(version));
+			SetDlgItemText(hwnd, IDC_VERSION, title);
 			return TRUE;
 		}
 

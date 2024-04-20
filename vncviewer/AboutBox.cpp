@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-//  Copyright (C) 2002-2013 UltraVNC Team Members. All Rights Reserved.
+//  Copyright (C) 2002-2024 UltraVNC Team Members. All Rights Reserved.
 //
 //  This program is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -16,17 +16,17 @@
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
 //  USA.
 //
-// If the source code for the program is not available from the place from
-// which you received this file, check 
-// http://www.uvnc.com/
+//  If the source code for the program is not available from the place from
+//  which you received this file, check
+//  https://uvnc.com/
 //
 ////////////////////////////////////////////////////////////////////////////
- 
-
 
 
 #include "stdhdrs.h"
 #include "vncviewer.h"
+#include "Hyperlinks.h"
+#include "UltraVNCHelperFunctions.h"
 
 HBITMAP
     DoGetBkGndBitmap(IN CONST UINT uBmpResId )
@@ -111,6 +111,12 @@ static LRESULT CALLBACK AboutDlgProc(HWND hwnd, UINT iMsg,
 			SetForegroundWindow(hwnd);
             extern char buildtime[];
             SetDlgItemText(hwnd, IDC_BUILDTIME, buildtime);
+            ConvertStaticToHyperlink(hwnd, IDC_UVNCCOM);
+            char version[50]{};
+            char title[256]{};
+            strcpy_s(title, "UltraVNC Viewer - ");
+            strcat_s(title, GetVersionFromResource(version));
+            SetDlgItemText(hwnd, IDC_UVVERSION, title);
 			return TRUE;
 		}
 	case WM_CLOSE:
@@ -120,16 +126,10 @@ static LRESULT CALLBACK AboutDlgProc(HWND hwnd, UINT iMsg,
 		if (LOWORD(wParam) == IDOK) {
 			EndDialog(hwnd, TRUE);
 		}
-	/*case WM_ERASEBKGND:
-            {
-               DoSDKEraseBkGnd((HDC)wParam, RGB(255,0,0));
-				return true;
-            }
-	case WM_CTLCOLORSTATIC:
-			{
-				SetBkMode((HDC) wParam, TRANSPARENT);
-				return (DWORD) GetStockObject(NULL_BRUSH);
-			}*/
+        if (LOWORD(wParam) == IDC_UVNCCOM) {
+            ShellExecute(GetDesktopWindow(), "open", "https://uvnc.com/", "", 0, SW_SHOWNORMAL);
+        }
+
 	}
 	return FALSE;
 }
