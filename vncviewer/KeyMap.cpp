@@ -552,6 +552,8 @@ CARD32 KeyMap::UCS2X(WCHAR UnicodeChar)
 
     return XChar;
 }
+
+
 bool reset=false;
 void KeyMap::PCtoX(BYTE virtKey, DWORD keyData, ClientConnection* clientCon)
 {
@@ -638,9 +640,12 @@ void KeyMap::PCtoX(BYTE virtKey, DWORD keyData, ClientConnection* clientCon)
         //   is seen without them by the VNC server
         // We don't release the Right Control; this allows German users
         //   to use it for doing Ctrl-AltGr-x, e.g. Ctl-@, etc
-        lctrl.release(downKeysym);
-        lalt.release(downKeysym);
-        ralt.release(downKeysym);
+
+        // do not release so AltGR works with bhyve, 11.05.2024
+        //
+        // lctrl.release(downKeysym);
+        // lalt.release(downKeysym);
+        // ralt.release(downKeysym);
     } else {
         // This is not a Ctrl-Alt (AltGr) key
        vnclog.Print(8, _T("Ctrl-Alt not pressed, fake release any Ctrl key\n"));
